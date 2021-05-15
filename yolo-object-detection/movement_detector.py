@@ -80,10 +80,17 @@ while input.isOpened():
                 scores = detection[5:]
                 classID = np.argmax(scores)
                 confidence = scores[classID]
+<<<<<<< HEAD
                 print("0")
                 if confidence > args["confidence"]:
                     print("!found a vroom vroom!")
                     telegram_send.send(messages=["Car detected"])
+=======
+                print("found nothing")
+                if confidence > args["confidence"]:
+                    print("!found a vroom vroom!")
+                    telegram_send.send(messages=["Wow that was easy!"])
+>>>>>>> 1e15ad9308618dcf760c44263dc607306efafab3
                     
                     break
 
