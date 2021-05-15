@@ -10,11 +10,11 @@ import os
 
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
-ap.add_argument("-i", "--image", required=True,
+ap.add_argument("-i", "--image", default='cropped.png',
 	help="path to input image")
-ap.add_argument("-y", "--yolo", required=True,
+ap.add_argument("-y", "--yolo", default='yolo-coco',
 	help="base path to YOLO directory")
-ap.add_argument("-c", "--confidence", type=float, default=0.5,
+ap.add_argument("-c", "--confidence", type=float, default=0.3,
 	help="minimum probability to filter weak detections")
 ap.add_argument("-t", "--threshold", type=float, default=0.3,
 	help="threshold when applyong non-maxima suppression")
@@ -81,6 +81,7 @@ for output in layerOutputs:
 			# size of the image, keeping in mind that YOLO actually
 			# returns the center (x, y)-coordinates of the bounding
 			# box followed by the boxes' width and height
+			print("im sure")
 			box = detection[0:4] * np.array([W, H, W, H])
 			(centerX, centerY, width, height) = box.astype("int")
 
@@ -94,6 +95,9 @@ for output in layerOutputs:
 			boxes.append([x, y, int(width), int(height)])
 			confidences.append(float(confidence))
 			classIDs.append(classID)
+
+			if classID == 2:
+    				print("a car was detected")
 
 # apply non-maxima suppression to suppress weak, overlapping bounding
 # boxes
