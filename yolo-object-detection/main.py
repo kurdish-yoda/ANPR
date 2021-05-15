@@ -7,10 +7,18 @@ from imutils.object_detection import non_max_suppression
 import pytesseract
 from matplotlib import pyplot as plt
 import telegram_send
+from picamera.array import PiRGBArray
+import picamera
+import time 
 
 i = 0
 
-input = cv2.VideoCapture('videos/test01.mp4')
+
+#input = camera.capture_continuous(rawCapture, format="bgr", use_video_port=True)
+
+input = cv2.VideoCapture(0)
+
+time.sleep(2.0)
 
 ret, capture1 = input.read()
 ret, capture2 = input.read()
@@ -80,11 +88,7 @@ while input.isOpened():
                 scores = detection[5:]
                 classID = np.argmax(scores)
                 confidence = scores[classID]
-                print("0")
-                if confidence > args["confidence"]:
-                    print("!found a vroom vroom!")
-                    telegram_send.send(messages=["Car detected"])
-                print("found nothing") 
+                print("found nothing")
                 if confidence > args["confidence"]:
                     print("!found a vroom vroom!")
                     telegram_send.send(messages=["Wow that was easy!"])
@@ -105,3 +109,4 @@ while input.isOpened():
 
 cv2.destroyAllWindows()
 input.release()
+
