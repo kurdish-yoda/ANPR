@@ -6,11 +6,16 @@ import os
 from imutils.object_detection import non_max_suppression
 import pytesseract
 from matplotlib import pyplot as plt
-import telegram_send
+import requests
+
+txt0 = 'https://api.telegram.org/bot1794107664:AAH8IZuCdcLDr_koMY24otS3K8WbAHs7Ljw/sendMessage?chat_id=-431037595&text="Runnning camera..."'
+txt1 = 'https://api.telegram.org/bot1794107664:AAH8IZuCdcLDr_koMY24otS3K8WbAHs7Ljw/sendMessage?chat_id=-431037595&text="a vehicle has been detected:"'
+txt2 = 'https://api.telegram.org/bot1794107664:AAH8IZuCdcLDr_koMY24otS3K8WbAHs7Ljw/sendMessage?chat_id=-431037595&text="The number plate is: HEYYYYYA"'
+#files={'photo':open('yolo-object-detection\images\mini.jpeg', 'rb')}
 
 i = 0
 
-input = cv2.VideoCapture('videos/test01.mp4')
+input = cv2.VideoCapture('videos\stock1.mp4')
 
 ret, capture1 = input.read()
 ret, capture2 = input.read()
@@ -19,16 +24,17 @@ ret, capture2 = input.read()
 
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
-ap.add_argument("-y", "--yolo", default='yolo-coco',
+ap.add_argument("-y", "--yolo", default='yolo-coco', 
 	help="base path to YOLO directory")
-ap.add_argument("-c", "--confidence", type=float, default=0.5,
+ap.add_argument("-c", "--confidence", type=float, default=0.3,
 	help="minimum probability to filter weak detections")
 ap.add_argument("-t", "--threshold", type=float, default=0.3,
 	help="threshold when applyong non-maxima suppression")
 args = vars(ap.parse_args())
 
 # load the COCO class labels our YOLO model was trained on
-labelsPath = os.path.sep.join([args["yolo"], "coco.names"])
+#labelsPath = os.path.sep.join([args["yolo"], "coco.names"])
+labelsPath = 'yolo-coco\coco.names'
 LABELS = open(labelsPath).read().strip().split("\n")
 
 # derive the paths to the YOLO weights and model configuration
@@ -44,6 +50,7 @@ ln = [ln[i[0] - 1] for i in net.getUnconnectedOutLayers()]
 
                 # End for COCO setup # 
 
+#requests.get(txt0)                                                                            #Text to show that we have initialized the main program. 
 while input.isOpened():
 
     diff = cv2.absdiff(capture1, capture2)                                                    #The apsolute difference between each of the captures.
@@ -56,10 +63,10 @@ while input.isOpened():
     for contour in contours:                                                                  #Finding and applying the boundariy boxes. 
         (x, y, w, h) = cv2.boundingRect(contour)
 
-        if cv2.contourArea(contour) < 12000:
+        if cv2.contourArea(contour) < 1000:
             continue
 
-        #cv2.rectangle(capture1, (x, y), (x+w, y+h), (0, 255, 0), 2)
+        cv2.rectangle(capture1, (x, y), (x+w, y+h), (0, 255, 0), 2)
         cropped = capture1[y:y+h, x:x+w]
         #cv2.imwrite('cropped.png', cropped)
         #image = cv2.imread('images/here.jpg', 0)
@@ -80,18 +87,14 @@ while input.isOpened():
                 scores = detection[5:]
                 classID = np.argmax(scores)
                 confidence = scores[classID]
-                print("0")
+                print("null")
                 if confidence > args["confidence"]:
-                    print("!found a vroom vroom!")
-                    telegram_send.send(messages=["Car detected"])
-                print("found nothing") 
-                if confidence > args["confidence"]:
-                    print("!found a vroom vroom!")
-                    telegram_send.send(messages=["Wow that was easy!"])
-                    
+                    print("GOT A HIT!")
+                    requests.get(txt1)
+                    requests.post('https://api.telegram.org/bot1794107664:AAH8IZuCdcLDr_koMY24otS3K8WbAHs7Ljw/sendPhoto?chat_id=-431037595', files=cropped)
                     break
 
-    #cv2.imshow("output", capture1)
+    cv2.imshow("output", capture1)
 
     #img = cv2.imread('cropped.png', 0)
     #cv2.imshow('cropped', img)

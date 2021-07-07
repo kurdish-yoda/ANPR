@@ -5,11 +5,11 @@ import pytesseract
 from matplotlib import pyplot as plt
 
 #Creating argument dictionary for the default arguments needed in the code. 
-args = {"image":"car.png", "east":"frozen_east_text_detection.pb", "min_confidence":0.5, "width":320, "height":320}
+args = {"image":"heyy.jpg", "east":"frozen_east_text_detection.pb", "min_confidence":0.5, "width":320, "height":320}
 
 #Give location of the image to be read.
 
-args['image']="car.png"
+args['image']="images\heyy.jpg"
 image = cv2.imread(args['image'])
 
 #Saving a original image and shape
