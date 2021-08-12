@@ -3,7 +3,7 @@ import requests
 
 txt1 = 'https://api.telegram.org/bot1794107664:AAH8IZuCdcLDr_koMY24otS3K8WbAHs7Ljw/sendMessage?chat_id=-431037595&text="a vehicle has been detected:"'
 txt2 = 'https://api.telegram.org/bot1794107664:AAH8IZuCdcLDr_koMY24otS3K8WbAHs7Ljw/sendMessage?chat_id=-431037595&text="The number plate is: ~~~~~"'
-files={'photo':open('yolo-object-detection\images\mini.jpeg', 'rb')}
+files={'photo':open('/home/pi/ANPR/yolo-object-detection/test.jpg', 'rb')}
 
 requests.get(txt1)
 
