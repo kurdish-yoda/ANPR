@@ -34,7 +34,7 @@ args = vars(ap.parse_args())
 
 # load the COCO class labels our YOLO model was trained on
 #labelsPath = os.path.sep.join([args["yolo"], "coco.names"])
-labelsPath = 'yolo-coco\coco.names'
+labelsPath = 'yolo-coco/coco.names'
 LABELS = open(labelsPath).read().strip().split("\n")
 
 # derive the paths to the YOLO weights and model configuration
