@@ -221,10 +221,11 @@ while input.isOpened():
                         cv2.putText(orig_image, text, (start_X, start_Y - 30),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.7,(0,0, 255), 2)
 
-                    requests.post('https://api.telegram.org/bot1794107664:AAH8IZuCdcLDr_koMY24otS3K8WbAHs7Ljw/sendPhoto?chat_id=-431037595', files=orig_image)
+                
                     break
 
     cv2.imshow("output", capture1)
+    requests.post('https://api.telegram.org/bot1794107664:AAH8IZuCdcLDr_koMY24otS3K8WbAHs7Ljw/sendPhoto?chat_id=-431037595', files=capture1)
 
     #img = cv2.imread('cropped.png', 0)
     #cv2.imshow('cropped', img)
