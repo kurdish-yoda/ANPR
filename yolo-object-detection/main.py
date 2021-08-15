@@ -7,15 +7,17 @@ from imutils.object_detection import non_max_suppression
 import pytesseract
 from matplotlib import pyplot as plt
 import requests
+import picamera
+import picamera.array
 
-txt0 = 'https://api.telegram.org/bot1794107664:AAH8IZuCdcLDr_koMY24otS3K8WbAHs7Ljw/sendMessage?chat_id=-431037595&text="Runnning camera..."'
+txt0 = 'https://api.telegram.org/bot1794107664:AAH8IZuCdcLDr_koMY24otS3K8WbAHs7Ljw/sendMessage?chat_id=-431037595&text="Initializing ANPR camera."'
 txt1 = 'https://api.telegram.org/bot1794107664:AAH8IZuCdcLDr_koMY24otS3K8WbAHs7Ljw/sendMessage?chat_id=-431037595&text="a vehicle has been detected:"'
-txt2 = 'https://api.telegram.org/bot1794107664:AAH8IZuCdcLDr_koMY24otS3K8WbAHs7Ljw/sendMessage?chat_id=-431037595&text="The number plate is: HEYYYYYA"'
+txt2 = 'https://api.telegram.org/bot1794107664:AAH8IZuCdcLDr_koMY24otS3K8WbAHs7Ljw/sendMessage?chat_id=-431037595&text="The number plate is:"'
 #files={'photo':open('yolo-object-detection\images\mini.jpeg', 'rb')}
 
 i = 0
 
-input = cv2.VideoCapture('videos\stock1.mp4')
+input = cv2.VideoCapture('video.h264')
 
 ret, capture1 = input.read()
 ret, capture2 = input.read()
@@ -26,9 +28,9 @@ ret, capture2 = input.read()
 ap = argparse.ArgumentParser()
 ap.add_argument("-y", "--yolo", default='yolo-coco', 
 	help="base path to YOLO directory")
-ap.add_argument("-c", "--confidence", type=float, default=0.3,
+ap.add_argument("-c", "--confidence", type=float, default=2,
 	help="minimum probability to filter weak detections")
-ap.add_argument("-t", "--threshold", type=float, default=0.3,
+ap.add_argument("-t", "--threshold", type=float, default=1,
 	help="threshold when applyong non-maxima suppression")
 args = vars(ap.parse_args())
 
@@ -99,8 +101,24 @@ def predictions(prob_score, geo):
 
                     # !START OF MAIN! #
 
-#requests.get(txt0)                                                                            #Text to show that we have initialized the main program. 
+requests.get(txt0)
+#print('initializing program')                                                                            #Text to show that we have initialized the main program. 
 while input.isOpened():
+
+    #with picamera.PiCamera() as input:
+     #   input.resolution = (1024,768)
+      #  input.start_preview()
+       # input.rotation = 180
+       # time.sleep(2)
+       # input.capture('capture1.jpg')
+       # time.sleep(0.5)
+    
+    
+    #files = {'photo':open('/home/pi/ANPR/yolo-object-detection/capture1.jpg', 'rb')}
+    #requests.post('https://api.telegram.org/bot1794107664:AAH8IZuCdcLDr_koMY24otS3K8WbAHs7Ljw/sendPhoto?chat_id=-431037595', files=files)      
+    
+    #capture1 = cv2.imread('capture1.png', 1)
+    #capture2 = cv2.imread('capture2.png', 1)
 
     diff = cv2.absdiff(capture1, capture2)                                                    #The apsolute difference between each of the captures.
     diff_gray = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)                                        #Transfering the differences to grayscale. 
@@ -108,8 +126,13 @@ while input.isOpened():
     _, thresh = cv2.threshold(diff_blur, 20, 255, cv2.THRESH_BINARY)                          #Extracting treshold. 
     diff_dilated = cv2.dilate(thresh, None, iterations=3)                                     #Dialating the threshold. 
     contours, _ = cv2.findContours(diff_dilated, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)      #Applying contours on that dilation. 
-
-    for contour in contours:                                                                  #Finding and applying the boundariy boxes. 
+     
+    
+    #print('finished setup of captures')
+    
+    for contour in contours:                                                                  #Finding and applying the boundariy boxes.
+        
+        #print('got into 1 for')
         (x, y, w, h) = cv2.boundingRect(contour)
 
         if cv2.contourArea(contour) < 1000:
@@ -117,15 +140,15 @@ while input.isOpened():
 
         cv2.rectangle(capture1, (x, y), (x+w, y+h), (0, 255, 0), 2)
         cropped = capture1[y:y+h, x:x+w]
-        #cv2.imwrite('cropped.png', cropped)
-        #image = cv2.imread('images/here.jpg', 0)
+        cv2.imwrite('cropped.png', cropped)
+        #files = {'photo': open('/home/pi/ANPR/yolo-object-detection/cropped.png', 'rb')}
+        #requests.post('https://api.telegram.org/bot1794107664:AAH8IZuCdcLDr_koMY24otS3K8WbAHs7Ljw/sendPhoto?chat_id=-431037595', files = files)
 
         # construct a blob from the input image and then perform a forward
         # pass of the YOLO object detector, giving us our bounding boxes and
         # associated probabilities
         
-        blob = cv2.dnn.blobFromImage(cropped, 1 / 255.0, (416, 416),
-	    swapRB=True, crop=False)
+        blob = cv2.dnn.blobFromImage(cropped, 1 / 255.0, (416, 416), swapRB=True, crop=False)
         net.setInput(blob)
         start = time.time()
         layerOutputs = net.forward(ln)
@@ -133,28 +156,29 @@ while input.isOpened():
 
         for output in layerOutputs:
             for detection in output:
+                #print('got into 2 for')
                 scores = detection[5:]
                 classID = np.argmax(scores)
                 confidence = scores[classID]
-                print("null")
+                #print("null")
                 if confidence > args["confidence"]:
-
+                    requests.get(txt1)
                     #Creating argument dictionary for the default arguments needed in the code. 
-                    args = {"image":"heyy.jpg", "east":"frozen_east_text_detection.pb", "min_confidence":0.5, "width":320, "height":320}
+                    args = {"image":"cropped.png", "east":"frozen_east_text_detection.pb", "min_confidence":0.5, "width":320, "height":320}
 
                     #Give location of the image to be read.
-
-                    args['image']="images\heyy.jpg"
+                    args['image']="cropped.png"
                     image = cv2.imread(args['image'])
-
+                         
                     #Saving a original image and shape
                     orig = image.copy()
+                    
+                    requests.post('https://api.telegram.org/bot1794107664:AAH8IZuCdcLDr_koMY24otS3K8WbAHs7Ljw/sendPhoto?chat_id=-431037595', files = files)
                     (origH, origW) = image.shape[:2]
-
+                    
                     # set the new height and width to default 320 by using args #dictionary.  
                     (newW, newH) = (args["width"], args["height"])
 
-                    #Calculate the ratio between original and new image for both height and weight. 
                     #This ratio will be used to translate bounding box location on the original image. 
                     rW = origW / float(newW)
                     rH = origH / float(newH)
@@ -220,22 +244,20 @@ while input.isOpened():
                             (0, 0, 255), 2)
                         cv2.putText(orig_image, text, (start_X, start_Y - 30),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.7,(0,0, 255), 2)
-
-                
-                    break
-
-    cv2.imshow("output", capture1)
-    requests.post('https://api.telegram.org/bot1794107664:AAH8IZuCdcLDr_koMY24otS3K8WbAHs7Ljw/sendPhoto?chat_id=-431037595', files=capture1)
+                         
+                    cv2.imwrite('orig.png', orig_image)                 
+                    files = {'photo': open('home/pi/ANPR/yolo-object-detection/orig.png','rb')}
+                    requests.post('https://api.telegram.org/bot1794107664:AAH8IZuCdcLDr_koMY24otS3K8WbAHs7Ljw/sendPhoto?chat_id=-431037595', files=files)
+    #cv2.imshow("output", capture1)
+    
+    #capture1 = capture2 
+    #requests.post('https://api.telegram.org/bot1794107664:AAH8IZuCdcLDr_koMY24otS3K8WbAHs7Ljw/sendPhoto?chat_id=-431037595', files=capture2)
+    print('got to the end of script')
 
     #img = cv2.imread('cropped.png', 0)
     #cv2.imshow('cropped', img)
 
-    capture1 = capture2
+    #capture1 = capture2
 
-    ret, capture2 = input.read()                                                             # THIS IS THE END OF THE MOVEMENT CAPTURE AND IMG EXTRACTION !
-    
-    if cv2.waitKey(40) == 27:
-        break
-
-cv2.destroyAllWindows()
-input.release()
+    #ret, capture2 = input.read()
+import numpy as np
